@@ -45,10 +45,7 @@
 
     // 테스트 코드 포함 메시지 추가 (하이라이팅 확인용)
     const sample = `
-\`\`\`python
-def greet(name):
-    print(f"안녕, {name}!")
-\`\`\`
+안녕하세요!
 `;
     addMessage(sample, false);
   }
@@ -169,7 +166,7 @@ def greet(name):
     try {
       // 여기를 너 서버 주소에 맞게 바꿔야 함!
       const encodedMsg = encodeURIComponent(text);
-      const url = `https://yuchan5386-elm.hf.space/api/chat?message=${encodedMsg}`;
+      const url = `https://yuchan5386-vechat.hf.space/api/chat?message=${encodedMsg}`;
 
       const res = await fetch(url, { method: 'GET' });
 
@@ -244,5 +241,6 @@ def greet(name):
 
   // 초기 실행
   init();
+
 
 
