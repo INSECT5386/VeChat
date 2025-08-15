@@ -1,0 +1,20 @@
+{
+  "name": "ELM-Chat",
+  "short_name": "ELM",
+  "start_url": "/ELM-Chat/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1f1f1f",
+  "icons": [
+    {
+      "src": "/ELM-Chat/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/ELM-Chat/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

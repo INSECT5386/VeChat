@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>ELM-Chat</title>
+
+  <!-- 구글 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/atom-one-light.min.css" />
+
+  <!-- 사용자 정의 스타일 -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+
+  <!-- 사이드바: 채팅방 목록 -->
+  <div id="sidebar">
+    <h2>Chat Rooms</h2>
+    <div id="room-list">
+      <ul></ul>
+    </div>
+    <button id="new-room-btn">새 대화방 만들기</button>
+  </div>
+
+  <!-- 메인 영역: 채팅 + 입력창 -->
+  <div id="main-area">
+    <div id="chat-container"></div>
+
+    <div id="input-area">
+      <textarea id="input-text" rows="1" placeholder="메시지를 입력하세요..."></textarea>
+      <button id="send-btn" disabled>전송</button>
+    </div>
+  </div>
+
+  <!-- 외부 라이브러리 (HTML에서 로드) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js"></script>
+
+  <!-- 사용자 정의 JS -->
+  <script src="js/script.js"></script>
+
+  <!-- 서비스 워커 등록 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('✅ 서비스 워커 등록 성공:', registration.scope);
+          })
+          .catch(error => {
+            console.error('❌ 서비스 워커 등록 실패:', error);
+          });
+      });
+    } else {
+      console.log('서비스 워커를 지원하지 않는 브라우저입니다.');
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+
