@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap');
-
 :root {
   --sidebar-width: 280px;
 }
@@ -14,44 +12,43 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
-  background-color: #faf7f0;  /* 크림 베이지톤 */
-  color: #4a4a4a;             /* 차분한 다크 그레이 */
+  background-color: #f5f5f5;  /* 밝은 그레이 */
+  color: #333;
   overflow: hidden;
   display: flex;
 }
 
+/* ================== Sidebar ================== */
 #sidebar {
   width: var(--sidebar-width);
   height: 100vh;
-  background-color: #fff8e7;  /* 아주 연한 크림색 */
-  border-right: 1px solid #e5e1d8; /* 베이지톤 경계 */
+  background-color: #ffffff;
+  border-right: 1px solid #ddd;
   padding: 24px 20px;
-  box-sizing: border-box;
   overflow-y: auto;
   flex-shrink: 0;
   user-select: none;
-  box-shadow: 3px 0 15px rgba(0,0,0,0.04);
+  box-shadow: 3px 0 15px rgba(0,0,0,0.05);
 }
 
 #sidebar h2 {
-  color: #b28d5c;  /* 따뜻한 황토빛 */
+  color: #d32f2f;
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 16px;
   line-height: 1.2;
   white-space: nowrap;
-  user-select: none;
 }
 
 #room-list {
   flex: 1;
   overflow-y: auto;
-  background: #fefbf5;  /* 밝은 크림톤 */
+  background: #f9f9f9;
   border-radius: 12px;
-  border: 1px solid #e5e1d8;
+  border: 1px solid #ddd;
   padding: 8px 0;
   scrollbar-width: thin;
-  scrollbar-color: #b28d5c transparent;
+  scrollbar-color: #d32f2f transparent;
   margin-bottom: 16px;
 }
 
@@ -62,7 +59,7 @@ html, body {
 #room-list li {
   padding: 12px 24px;
   cursor: pointer;
-  color: #7e7a72; /* 부드러운 그레이 브라운 */
+  color: #666;
   transition: background-color 0.25s ease, color 0.25s ease, border-left-color 0.25s ease;
   border-left: 4px solid transparent;
   border-radius: 0 8px 8px 0;
@@ -70,47 +67,47 @@ html, body {
 }
 
 #room-list li:hover {
-  background-color: #fff7db;  /* 은은한 황토빛 배경 */
-  color: #5e4a22;  /* 톤 다운된 브라운 */
+  background-color: #fde0e0;
+  color: #b71c1c;
 }
 
 #room-list li.active {
-  background-color: #f1e4b3;  /* 부드러운 머스터드 톤 */
-  color: #6f5823;
-  border-left-color: #b28d5c;
+  background-color: #ffcdd2;
+  color: #b71c1c;
+  border-left-color: #d32f2f;
 }
 
 #new-room-btn {
-  background-color: #b28d5c;
-  color: #fff8e7;
+  background-color: #d32f2f;
+  color: #fff;
   border: none;
   border-radius: 12px;
   font-weight: 700;
   font-size: 14px;
   padding: 10px 16px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(178, 141, 92, 0.4);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4);
   user-select: none;
   transition: background-color 0.3s ease, transform 0.1s ease;
   width: 100%;
-  box-sizing: border-box;
   margin-top: auto;
 }
 
 #new-room-btn:hover {
-  background-color: #8e6f3f;
+  background-color: #b71c1c;
 }
 
 #new-room-btn:active {
   transform: translateY(2px);
 }
 
+/* ================== Main Chat ================== */
 #main-area {
   flex-grow: 1;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #fffaf1;  /* 크림톤 배경 */
+  background-color: #f5f5f5;
   overflow: hidden;
   position: relative;
 }
@@ -123,8 +120,8 @@ html, body {
   flex-direction: column;
   gap: 16px;
   scrollbar-width: thin;
-  scrollbar-color: #b28d5c transparent;
-  background-color: #fffaf1;
+  scrollbar-color: #d32f2f transparent;
+  background-color: #f5f5f5;
 }
 
 @keyframes fadeSlideUp {
@@ -146,7 +143,7 @@ html, body {
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   opacity: 0;
   animation: fadeSlideUp 0.4s forwards;
   position: relative;
@@ -155,32 +152,32 @@ html, body {
 }
 
 .message.user {
-  background: linear-gradient(135deg, #c9b380, #a68d3a);
-  color: #fff8e7;
+  background: linear-gradient(135deg, #9e9e9e, #d32f2f);  /* Gray → Red */
+  color: #fff;
   align-self: flex-end;
   border-bottom-right-radius: 8px;
-  box-shadow: 0 6px 20px rgba(166, 141, 58, 0.3);
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
 }
 
 .message.bot {
-  background-color: #fefaf3;
-  color: #6b6552;
+  background-color: #e0e0e0;
+  color: #333;
   align-self: flex-start;
   border-bottom-left-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 pre {
-  background-color: #fdf9f0; /* 완전 밝고 부드러운 크림색 */
+  background-color: #f0f0f0;
   border-radius: 16px;
   padding: 20px 28px;
   overflow-x: auto;
   margin-top: 14px;
-  border: 1px solid #e5deca; /* 살짝 연한 베이지 라인 */
+  border: 1px solid #ccc;
   font-family: 'JetBrains Mono', monospace;
   font-size: 15px;
-  color: #5e533e; /* 따뜻한 갈색 계열 글자색 */
-  box-shadow: 0 3px 10px rgba(180, 160, 110, 0.1); /* 부드러운 그림자 */
+  color: #333;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
   position: relative;
   user-select: text;
 }
@@ -189,8 +186,8 @@ pre {
   position: absolute;
   top: 12px;
   right: 14px;
-  background-color: #a68d3a;
-  color: #fff8e7;
+  background-color: #d32f2f;
+  color: #fff;
   border: none;
   border-radius: 8px;
   padding: 6px 14px;
@@ -205,15 +202,16 @@ pre:hover .copy-btn {
   opacity: 1;
 }
 
+/* ================== Input ================== */
 #input-area {
   position: fixed;
   bottom: 0;
   left: var(--sidebar-width);
   right: 0;
   height: 60px;
-  background-color: #f5f1e7;
-  border-top: 1px solid #e5decf;
-  box-shadow: 0 -1px 15px rgba(0, 0, 0, 0.03);
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -1px 15px rgba(0,0,0,0.03);
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -223,28 +221,28 @@ pre:hover .copy-btn {
 #input-text {
   flex: 1;
   font-size: 17px;
-  border: 1.8px solid #d6cfa8;
+  border: 1.8px solid #ccc;
   border-radius: 30px;
   padding: 14px 24px;
   resize: none;
   min-height: 36px;
   max-height: 100px;
   font-family: 'Nanum Gothic', monospace;
-  background-color: #fff8e7;
-  color: #4a4a4a;
+  background-color: #ffffff;
+  color: #333;
   outline-offset: 4px;
-  box-shadow: inset 0 0 8px #d2c589;
+  box-shadow: inset 0 0 8px #ccc;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #input-text:focus {
-  border-color: #b28d5c;
-  box-shadow: 0 0 0 6px rgba(178, 141, 92, 0.3);
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 6px rgba(211, 47, 47, 0.2);
 }
 
 #send-btn {
-  background-color: #b28d5c;
-  color: #fff8e7;
+  background-color: #d32f2f;
+  color: #fff;
   border: none;
   font-weight: 700;
   padding: 0 30px;
@@ -252,7 +250,7 @@ pre:hover .copy-btn {
   border-radius: 34px;
   cursor: pointer;
   font-size: 17px;
-  box-shadow: 0 6px 18px rgba(178, 141, 92, 0.4);
+  box-shadow: 0 6px 18px rgba(211, 47, 47, 0.4);
   user-select: none;
   transition: background-color 0.3s ease, transform 0.12s ease;
   height: 40px;
@@ -260,7 +258,7 @@ pre:hover .copy-btn {
 }
 
 #send-btn:hover {
-  background-color: #8e6f3f;
+  background-color: #b71c1c;
 }
 
 #send-btn:active {
@@ -268,12 +266,13 @@ pre:hover .copy-btn {
 }
 
 #send-btn:disabled {
-  background-color: #d6cfa8;
+  background-color: #ccc;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
 
+/* ================== Scrollbar ================== */
 #room-list::-webkit-scrollbar,
 #chat-container::-webkit-scrollbar {
   width: 8px;
@@ -286,63 +285,27 @@ pre:hover .copy-btn {
 
 #room-list::-webkit-scrollbar-thumb,
 #chat-container::-webkit-scrollbar-thumb {
-  background-color: #b28d5c;
+  background-color: #d32f2f;
   border-radius: 6px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
+/* ================== Responsive ================== */
 @media (max-width: 900px) {
-  #sidebar {
-    width: 220px;
-    padding: 20px 16px;
-    font-size: 14px;
-  }
-  #chat-container {
-    padding: 20px 16px 90px 16px;
-  }
-  .message {
-    max-width: 85%;
-    font-size: 16px;
-    padding: 16px 20px;
-  }
-  #input-text {
-    font-size: 16px;
-    padding: 14px 20px;
-  }
-  #send-btn {
-    padding: 0 24px;
-    font-size: 16px;
-    margin-left: 14px;
-  }
-  #input-area {
-    left: 220px;
-  }
+  #sidebar { width: 220px; padding: 20px 16px; font-size: 14px; }
+  #chat-container { padding: 20px 16px 90px 16px; }
+  .message { max-width: 85%; font-size: 16px; padding: 16px 20px; }
+  #input-text { font-size: 16px; padding: 14px 20px; }
+  #send-btn { padding: 0 24px; font-size: 16px; margin-left: 14px; }
+  #input-area { left: 220px; }
 }
 
 @media (max-width: 600px) {
-  #sidebar {
-    display: none;
-  }
-  #main-area {
-    height: 100vh;
-  }
-  #input-text {
-    font-size: 15px;
-    padding: 12px 16px;
-  }
-  #send-btn {
-    padding: 0 20px;
-    font-size: 15px;
-    margin-left: 10px;
-  }
-  .message {
-    max-width: 90%;
-    font-size: 15px;
-    padding: 14px 18px;
-  }
-  #input-area {
-    left: 0;
-  }
+  #sidebar { display: none; }
+  #main-area { height: 100vh; }
+  #input-text { font-size: 15px; padding: 12px 16px; }
+  #send-btn { padding: 0 20px; font-size: 15px; margin-left: 10px; }
+  .message { max-width: 90%; font-size: 15px; padding: 14px 18px; }
+  #input-area { left: 0; }
 }
-
