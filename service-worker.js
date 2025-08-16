@@ -1,5 +1,5 @@
 // 루트 또는 public/ 아래에 service-worker.js
-const CACHE_NAME = 'covec-cache-v17';
+const CACHE_NAME = 'covec-cache-v57';
 const urlsToCache = [
   '/ELM-Chat/',
   '/ELM-Chat/index.html',
