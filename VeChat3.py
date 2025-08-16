@@ -78,6 +78,18 @@ def map_fn(src, tgt):
 
 train_ds = stream_dataset.map(map_fn)
 
+
+class SwiGLU(tf.keras.layers.Layer):
+    def __init__(self, d_model, d_ff):
+        super().__init__()
+        self.proj = tf.keras.layers.Dense(d_ff * 2)
+        self.out = tf.keras.layers.Dense(d_model)
+
+    def call(self, x):
+        x_proj = self.proj(x)
+        x_val, x_gate = tf.split(x_proj, 2, axis=-1)
+        return self.out(x_val * tf.nn.silu(x_gate))
+        
 # =======================
 # 3) Transformer 모델 정의
 # =======================
@@ -85,7 +97,7 @@ class EncoderBlock(layers.Layer):
     def __init__(self, d_model, num_heads, dff, dropout=0.1):
         super().__init__()
         self.mha = layers.MultiHeadAttention(num_heads=num_heads, key_dim=d_model)
-        self.ffn = tf.keras.Sequential([layers.Dense(dff, activation="gelu"), layers.Dense(d_model)])
+        self.ffn = SwiGLU(d_model, dff)
         self.norm1 = layers.LayerNormalization(epsilon=1e-6)
         self.norm2 = layers.LayerNormalization(epsilon=1e-6)
         self.dropout1 = layers.Dropout(dropout)
@@ -105,7 +117,7 @@ class DecoderBlock(layers.Layer):
         super().__init__()
         self.self_mha = layers.MultiHeadAttention(num_heads=num_heads, key_dim=d_model)
         self.cross_mha = layers.MultiHeadAttention(num_heads=num_heads, key_dim=d_model)
-        self.ffn = tf.keras.Sequential([layers.Dense(dff, activation="gelu"), layers.Dense(d_model)])
+        self.ffn = SwiGLU(d_model, dff)
         self.norm1 = layers.LayerNormalization(epsilon=1e-6)
         self.norm2 = layers.LayerNormalization(epsilon=1e-6)
         self.norm3 = layers.LayerNormalization(epsilon=1e-6)
@@ -126,10 +138,19 @@ class DecoderBlock(layers.Layer):
         return out3
 
 class Transformer(tf.keras.Model):
-    def __init__(self, num_layers, d_model, num_heads, dff, input_vocab_size, target_vocab_size, dropout=0.1):
+    def __init__(self, num_layers, d_model, num_heads, dff, input_vocab_size, target_vocab_size,
+                 max_len=100, dropout=0.1):
         super().__init__()
+        self.max_len = max_len
+        self.d_model = d_model
+        
+        # 🔹 입력 임베딩 + 위치 임베딩
         self.enc_embedding = layers.Embedding(input_vocab_size, d_model)
+        self.enc_pos_embedding = layers.Embedding(max_len, d_model)
+        
         self.dec_embedding = layers.Embedding(target_vocab_size, d_model)
+        self.dec_pos_embedding = layers.Embedding(max_len, d_model)
+        
         self.enc_layers = [EncoderBlock(d_model, num_heads, dff, dropout) for _ in range(num_layers)]
         self.dec_layers = [DecoderBlock(d_model, num_heads, dff, dropout) for _ in range(num_layers)]
         self.final_layer = layers.Dense(target_vocab_size)
@@ -137,13 +158,24 @@ class Transformer(tf.keras.Model):
     def call(self, inputs, training=False):
         enc_inputs = inputs["enc_inputs"]
         dec_inputs = inputs["dec_inputs"]
-        x = self.enc_embedding(enc_inputs)
-        for layer in self.enc_layers: x = layer(x, training=training)
+
+        # 🔹 위치 인덱스 생성
+        enc_pos = tf.range(tf.shape(enc_inputs)[1])[tf.newaxis, :]
+        dec_pos = tf.range(tf.shape(dec_inputs)[1])[tf.newaxis, :]
+
+        # 🔹 임베딩 + 위치 임베딩
+        x = self.enc_embedding(enc_inputs) + self.enc_pos_embedding(enc_pos)
+        for layer in self.enc_layers:
+            x = layer(x, training=training)
         enc_out = x
-        y = self.dec_embedding(dec_inputs)
-        for layer in self.dec_layers: y = layer(y, enc_out, training=training)
+
+        y = self.dec_embedding(dec_inputs) + self.dec_pos_embedding(dec_pos)
+        for layer in self.dec_layers:
+            y = layer(y, enc_out, training=training)
+
         logits = self.final_layer(y)
         return logits
+
 
 model = Transformer(num_layers=4, d_model=128, num_heads=8, dff=512,
                     input_vocab_size=vocab_size, target_vocab_size=vocab_size)
@@ -164,9 +196,22 @@ def smoothed_loss_keras(y_true, y_pred, eps=0.1):
     per_tok = per_tok * mask
     return tf.reduce_sum(per_tok) / (tf.reduce_sum(mask)+1e-8)
 
+def masked_accuracy(y_true, y_pred):
+    # y_true를 int로 변환
+    y_true = tf.cast(y_true, tf.int32)
+    mask = tf.cast(tf.not_equal(y_true, pad_id), tf.float32)  # pad 토큰 제외
+    pred_id = tf.argmax(y_pred, axis=-1, output_type=tf.int32)
+    acc = tf.cast(tf.equal(y_true, pred_id), tf.float32) * mask
+    return tf.reduce_sum(acc) / (tf.reduce_sum(mask) + 1e-8)
+
 
 tf.config.optimizer.set_jit(True)  # 전체 모델에 대해 XLA 활성화
-model.compile(optimizer=optimizer, loss=smoothed_loss_keras, run_eagerly=False)
+model.compile(
+    optimizer=optimizer,
+    loss=smoothed_loss_keras,
+    metrics=[masked_accuracy],
+    run_eagerly=False
+)
 
 # =======================
 # 5) 학습
