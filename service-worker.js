@@ -1,5 +1,5 @@
 // 루트 또는 public/ 아래에 service-worker.js
-const CACHE_NAME = 'covec-cache-v59;
+const CACHE_NAME = 'covec-cache-v60;
 const urlsToCache = [
   '/VeChat/',
   '/VeChat/index.html',
@@ -10,7 +10,7 @@ const urlsToCache = [
   '/VeChat/img/icon-512.png',
   'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
   'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js',
-  'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/atom-one-light.min.css'
+  'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/atom-one-dark.min.css'
 ];
 
 self.addEventListener('install', (event) => {
