@@ -1,68 +1,417 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>VeChat</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VeChat — Minimal</title>
 
   <!-- 구글 폰트 -->
-  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- highlight.js 스타일 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/atom-one-dark.min.css">
-  <!-- 사용자 정의 스타일 -->
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    :root{
+      --bg: #0f1115;
+      --panel: #111217;
+      --muted: #9aa4b2;
+      --accent: #ff6b6b;
+      --accent-2: #ffb86b;
+      --bubble-user: linear-gradient(135deg,#ffd6d6,#ff6b6b);
+      --bubble-bot: #0f1720;
+      --radius: 14px;
+      --glass: rgba(255,255,255,0.03);
+      --max-width: 900px;
+    }
+    body.light {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --accent: #ff3b30;
+      --accent-2: #ff8a3d;
+      --bubble-user: linear-gradient(135deg,#ffecec,#ffefef);
+      --bubble-bot: #f3f4f6;
+      --glass: rgba(0,0,0,0.03);
+    }
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color: #e6eef6; }
+    body.light { color: #0b1220; }
+    .app {
+      max-width: var(--max-width);
+      margin: 28px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 70vh;
+    }
+
+    header.app-header {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .title { display:flex; gap:12px; align-items:center; }
+    .logo { width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex;align-items:center;justify-content:center;font-weight:700;color:#111;padding-top:2px; box-shadow: 0 6px 18px rgba(255,107,107,0.18); }
+    .title h1 { font-size:16px;margin:0; }
+    .title p { margin:0;font-size:12px;color:var(--muted); }
+
+    .header-actions { display:flex; gap:8px; align-items:center; }
+    .btn { border: none; background: var(--glass); color: inherit; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px; transition: transform .06s ease, background .12s ease; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color: #111; box-shadow: 0 8px 22px rgba(255,107,107,0.14); }
+    .icon { opacity:0.9; margin-right:6px; }
+
+    .chat-wrap { padding:18px; display:flex; flex-direction:column; gap:16px; height: calc(70vh - 120px); overflow:auto; background: transparent; }
+    .msg { max-width: 86%; padding:14px 18px; border-radius: 14px; line-height:1.45; font-size:15px; white-space:pre-wrap; word-break:break-word; box-shadow: 0 6px 18px rgba(2,6,23,0.6); position:relative; }
+    .msg.bot { background: var(--bubble-bot); align-self:flex-start; color: inherit; border-top-left-radius:6px; }
+    .msg.user { background: var(--bubble-user); color: #111; align-self:flex-end; border-top-right-radius:6px; }
+    .meta { font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; gap:8px; align-items:center; }
+    .meta .who { font-weight:700; }
+
+    pre { margin:8px 0 0 0; padding:12px; border-radius:10px; overflow:auto; background: rgba(0,0,0,0.45); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "JetBrains Mono", monospace; font-size:13px; }
+    body.light pre { background: rgba(0,0,0,0.06); }
+
+    .copy-btn { position:absolute; right:10px; top:10px; background:var(--accent); color:#111; border:none; padding:6px 10px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; z-index:2; }
+    .pre-wrap { position:relative; margin-top:6px; }
+
+    .composer { display:flex; gap:8px; align-items:flex-end; padding:14px; border-top:1px solid rgba(255,255,255,0.02); background: linear-gradient(180deg, transparent, rgba(0,0,0,0.02)); }
+    textarea#input { flex:1; min-height:44px; max-height:160px; resize:none; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.04); background: transparent; color:inherit; font-size:15px; outline: none; box-shadow: inset 0 3px 10px rgba(0,0,0,0.3); }
+    .small { font-size:13px; padding:8px 10px; border-radius:10px; }
+
+    .muted { color:var(--muted); font-size:13px; }
+    .center { text-align:center; }
+    .spacer { flex:1; }
+
+    @media (max-width:640px){
+      .app { margin:12px; min-height:68vh; }
+      .chat-wrap { height: calc(65vh - 110px); padding:12px; gap:12px; }
+      .title h1 { font-size:14px; }
+      .logo { width:36px;height:36px;font-size:14px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="app" role="application" aria-label="VeChat minimal chat">
+    <header class="app-header">
+      <div class="title">
+        <div class="logo" aria-hidden="true">VC</div>
+        <div>
+          <h1>VeChat</h1>
+          <p class="muted">미니멀 채팅 · 마크다운 + 코드 하이라이트 · 로컬 저장</p>
+        </div>
+      </div>
 
-  <!-- 사이드바: 채팅방 목록 -->
-  <div id="sidebar">
-    <h2>VeChat</h2>
-    <div id="room-list">
-      <ul></ul>
+      <div class="header-actions" role="toolbar" aria-label="Actions">
+        <button id="btn-download" class="btn" title="대화 다운로드 (JSON)"><span class="icon">⬇️</span>내보내기</button>
+        <button id="btn-clear" class="btn" title="대화 초기화"><span class="icon">🧹</span>초기화</button>
+        <button id="btn-theme" class="btn" title="테마 전환"><span class="icon">🎛️</span>테마</button>
+        <button id="btn-settings" class="btn" title="설정"><span class="icon">⚙️</span>설정</button>
+      </div>
+    </header>
+
+    <main class="chat-wrap" id="chat" aria-live="polite"></main>
+
+    <div class="composer" role="region" aria-label="메시지 입력">
+      <textarea id="input" placeholder="메시지를 입력하세요 — Enter: 전송, Shift+Enter: 줄바꿈" aria-label="메시지 입력"></textarea>
+      <button id="btn-send" class="btn primary" title="전송 (Enter)"><span class="icon">➡️</span>전송</button>
     </div>
-    <button id="new-room-btn">+</button>
   </div>
 
-  <!-- 메인 영역: 채팅 + 입력창 -->
-  <div id="main-area">
-    <div id="chat-container"></div>
-
-    <div id="input-area">
-      <textarea id="input-text" rows="1" placeholder="메시지를 입력하세요..."></textarea>
-      <button id="send-btn" disabled>전송</button>
-    </div>
-  </div>
-
-  <!-- 외부 라이브러리 (HTML에서 로드) -->
+  <!-- 라이브러리: marked + highlight.js -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js"></script>
 
-  <!-- 사용자 정의 JS -->
-  <script src="js/script.js"></script>
-
-  <!-- 서비스 워커 등록 -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(registration => {
-            console.log('✅ 서비스 워커 등록 성공:', registration.scope);
-          })
-          .catch(error => {
-            console.error('❌ 서비스 워커 등록 실패:', error);
-          });
-      });
-    } else {
-      console.log('서비스 워커를 지원하지 않는 브라우저입니다.');
-    }
-  </script>
+    /* =======================
+       설정 (여기만 바꾸면 됨)
+       ======================= */
+    const API_URL_DEFAULT = 'https://yuchan5386-vechat.hf.space/api/chat'; // GET ?message=
+    const STORAGE_KEY = 'vechat_v2_messages';
+    const STORAGE_API_KEY = 'vechat_api_url';
 
+    /* =======================
+       초기화
+       ======================= */
+    const chatEl = document.getElementById('chat');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('btn-send');
+    const btnClear = document.getElementById('btn-clear');
+    const btnDownload = document.getElementById('btn-download');
+    const btnTheme = document.getElementById('btn-theme');
+    const btnSettings = document.getElementById('btn-settings');
+
+    let messages = loadMessages();
+
+    marked.setOptions({ gfm: true, breaks: true });
+
+    (function initTheme(){
+      const saved = localStorage.getItem('vechat_theme');
+      if (saved === 'light') document.body.classList.add('light');
+    })();
+
+    function renderAll() {
+      chatEl.innerHTML = '';
+      for (const m of messages) renderMessage(m, false);
+      scrollToBottom();
+    }
+
+    function renderMessage(msg, animate = true) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg ' + (msg.role === 'user' ? 'user' : 'bot');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML = `<span class="who">${msg.role === 'user' ? '나' : '봇'}</span>
+                        <span class="muted">${new Date(msg.ts).toLocaleString()}</span>`;
+      wrapper.appendChild(meta);
+
+      const contentHtml = marked.parse(msg.text || '');
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.innerHTML = contentHtml;
+
+      content.querySelectorAll('pre > code').forEach(code => {
+        try { hljs.highlightElement(code); } catch(e){ }
+        const pre = code.parentElement;
+        const wrap = document.createElement('div');
+        wrap.className = 'pre-wrap';
+        wrap.style.position = 'relative';
+        pre.parentNode.replaceChild(wrap, pre);
+        wrap.appendChild(pre);
+        if (!wrap.querySelector('.copy-btn')) {
+          const cb = document.createElement('button');
+          cb.className = 'copy-btn small';
+          cb.textContent = '복사';
+          cb.title = '코드 복사';
+          cb.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(code.innerText);
+              cb.textContent = '복사됨!';
+              setTimeout(()=> cb.textContent = '복사', 1400);
+            } catch {
+              cb.textContent = '실패';
+              setTimeout(()=> cb.textContent = '복사', 1400);
+            }
+          };
+          wrap.appendChild(cb);
+        }
+      });
+
+      wrapper.appendChild(content);
+      chatEl.appendChild(wrapper);
+      if (animate) scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      requestAnimationFrame(()=> chatEl.scrollTop = chatEl.scrollHeight + 200);
+    }
+
+    function saveMessages() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch(e){ console.warn('save failed', e); }
+    }
+    function loadMessages() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const sample = [
+            { role:'bot', text:'안녕! 새 미니멀 VeChat에 오신 걸 환영합니다. 테스트로 메시지를 보내보세요.', ts: Date.now() - 60000 }
+          ];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
+          return sample;
+        }
+        return JSON.parse(raw);
+      } catch(e){ console.warn('load failed', e); return []; }
+    }
+
+    /* =======================
+       SSE 기반 전송/수신
+       ======================= */
+    let isSending = false;
+    function getApiUrlFallback(){
+      return localStorage.getItem(STORAGE_API_KEY) || API_URL_DEFAULT;
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text || isSending) return;
+      isSending = true;
+      sendBtn.disabled = true;
+
+      // 유저 메시지 추가
+      const userMsg = { role:'user', text, ts: Date.now() };
+      messages.push(userMsg);
+      saveMessages();
+      renderMessage(userMsg);
+      inputEl.value = '';
+      inputEl.focus();
+
+      // 봇 자리 추가 (placeholder)
+      const botMsg = { role:'bot', text:'', ts: Date.now() + 1 };
+      messages.push(botMsg);
+      saveMessages();
+      renderMessage(botMsg);
+      let botDom = Array.from(chatEl.querySelectorAll('.msg.bot')).pop();
+      const contentNode = botDom.querySelector('.content');
+
+      // EventSource 연결
+      const encoded = encodeURIComponent(text);
+      const url = `${getApiUrlFallback()}?message=${encoded}`;
+
+      let full = '';
+      let es;
+      try {
+        es = new EventSource(url);
+      } catch (err) {
+        botMsg.text = `⚠️ EventSource 연결 실패: ${err.message}`;
+        saveMessages();
+        contentNode.innerHTML = marked.parse(botMsg.text);
+        isSending = false;
+        sendBtn.disabled = false;
+        return;
+      }
+
+      // onmessage: 서버가 보낸 각 data 라인 처리
+      es.onmessage = (ev) => {
+        // ev.data 는 보통 JSON 문자열: {"char":"감","done":...}
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.char !== undefined) {
+            full += data.char;
+            botMsg.text = full;
+            saveMessages();
+            // 안전하게 마크다운 변환
+            try {
+              contentNode.innerHTML = marked.parse(full);
+              contentNode.querySelectorAll('pre > code').forEach(c=> { try{ hljs.highlightElement(c); }catch{} });
+            } catch(e) {
+              contentNode.textContent = full;
+            }
+            scrollToBottom();
+          } else if (data.done) {
+            es.close();
+            isSending = false;
+            sendBtn.disabled = false;
+            // 최종 저장은 이미 set
+          } else if (data.error) {
+            es.close();
+            botMsg.text = `⚠️ ${data.error}`;
+            saveMessages();
+            try { contentNode.innerHTML = marked.parse(botMsg.text); } catch { contentNode.textContent = botMsg.text; }
+            isSending = false;
+            sendBtn.disabled = false;
+          } else {
+            // 기타 필드 처리(있다면)
+          }
+        } catch (e) {
+          // 만약 ev.data 가 JSON 아니면 그냥 텍스트로 append
+          full += ev.data;
+          botMsg.text = full;
+          saveMessages();
+          try {
+            contentNode.innerHTML = marked.parse(full);
+            contentNode.querySelectorAll('pre > code').forEach(c=> { try{ hljs.highlightElement(c); }catch{} });
+          } catch {
+            contentNode.textContent = full;
+          }
+          scrollToBottom();
+        }
+      };
+
+      es.onerror = (err) => {
+        // 브라우저 이벤트 에러 (네트워크/서버 차단 등)
+        console.warn('SSE error', err);
+        // 닫고 에러 메시지 표시
+        try { es.close(); } catch(e){}
+        if (!full) {
+          botMsg.text = '⚠️ 스트리밍 연결 오류 또는 서버가 응답을 중단했습니다.';
+          saveMessages();
+          try { contentNode.innerHTML = marked.parse(botMsg.text); } catch { contentNode.textContent = botMsg.text; }
+        } else {
+          // partial content already present; leave it
+        }
+        isSending = false;
+        sendBtn.disabled = false;
+      };
+    }
+
+    /* =======================
+       이벤트 바인딩
+       ======================= */
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    sendBtn.addEventListener('click', sendMessage);
+
+    btnTheme.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      localStorage.setItem('vechat_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    });
+
+    btnClear.addEventListener('click', () => {
+      if (!confirm('대화를 초기화할까요? (로컬에 저장된 기록이 삭제됩니다)')) return;
+      messages = [];
+      saveMessages();
+      chatEl.innerHTML = '';
+    });
+
+    btnDownload.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(messages, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vechat_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    btnSettings.addEventListener('click', () => {
+      const cur = localStorage.getItem(STORAGE_API_KEY) || API_URL_DEFAULT;
+      const newUrl = prompt('서버 엔드포인트를 입력하세요 (GET 방식, ?message=... 예시):', cur);
+      if (newUrl) {
+        localStorage.setItem(STORAGE_API_KEY, newUrl);
+        alert('엔드포인트 저장됨 — 다음 전송부터 적용됩니다.');
+      }
+    });
+
+    /* =======================
+       시작 렌더
+       ======================= */
+    renderAll();
+
+    // 입력창 자동 확장
+    function autoResizeTextarea(el) {
+      el.style.height = 'auto';
+      const h = Math.min(el.scrollHeight, 160);
+      el.style.height = h + 'px';
+    }
+    inputEl.addEventListener('input', ()=> autoResizeTextarea(inputEl));
+    autoResizeTextarea(inputEl);
+
+    (function showWelcomeToast(){
+      setTimeout(()=> {
+        const m = document.createElement('div');
+        m.className = 'muted center';
+        m.style.fontSize='13px';
+        m.style.marginTop='6px';
+        m.textContent = '엔드포인트는 상단 설정에서 바꿀 수 있어요. 서버가 SSE/스트리밍을 지원하면 더 매끄럽습니다.';
+        document.querySelector('.app').insertBefore(m, document.querySelector('.app').children[1]);
+        setTimeout(()=> m.remove(), 8000);
+      }, 800);
+    })();
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
